@@ -1491,13 +1491,13 @@ dhcp_option_mud_url(u16_t options_out_len, u8_t *options, char *mud_url)
   size_t mud_url_len = strlen(mud_url);
   if (mud_url_len > 0) {
     size_t len;
-    const char *p = netif->hostname;
+    const char *p = mud_url;
     /* Shrink len to available bytes (need 2 bytes for OPTION_MUD_URL
         and 1 byte for trailer) */
     size_t available = DHCP_OPTIONS_LEN - options_out_len - 3;
     LWIP_ASSERT("DHCP: MUD URL is too long!", mud_url_len <= available);
     len = LWIP_MIN(mud_url_len, available);
-    LWIP_ASSERT("DHCP: MUD URL is too long!", len <= 0xFF);
+    LWIP_ASSERT("DHCP: MUD URL is too long!", len < 253);
     options_out_len = dhcp_option(options_out_len, options, DHCP_OPTION_MUD_URL, (u8_t)len);
     while (len--) {
       options_out_len = dhcp_option_byte(options_out_len, options, *p++);
