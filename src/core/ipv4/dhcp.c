@@ -1484,30 +1484,28 @@ dhcp_option_hostname(u16_t options_out_len, u8_t *options, struct netif *netif)
 }
 #endif /* LWIP_NETIF_HOSTNAME */
 
-#if LWIP_NETIF_MUD_URL
+#if LWIP_DHCP_MUD_URL
 static u16_t
 dhcp_option_mud_url(u16_t options_out_len, u8_t *options, char *mud_url)
 {
-  if (netif->hostname != NULL) {
-    size_t mud_url_len = strlen(mud_url);
-    if (namelen > 0) {
-      size_t len;
-      const char *p = netif->hostname;
-      /* Shrink len to available bytes (need 2 bytes for OPTION_HOSTNAME
-         and 1 byte for trailer) */
-      size_t available = DHCP_OPTIONS_LEN - options_out_len - 3;
-      LWIP_ASSERT("DHCP: hostname is too long!", mud_url_len <= available);
-      len = LWIP_MIN(mud_url_len, available);
-      LWIP_ASSERT("DHCP: hostname is too long!", len <= 0xFF);
-      options_out_len = dhcp_option(options_out_len, options, DHCP_OPTION_MUD_URL, (u8_t)len);
-      while (len--) {
-        options_out_len = dhcp_option_byte(options_out_len, options, *p++);
-      }
+  size_t mud_url_len = strlen(mud_url);
+  if (mud_url_len > 0) {
+    size_t len;
+    const char *p = netif->hostname;
+    /* Shrink len to available bytes (need 2 bytes for OPTION_MUD_URL
+        and 1 byte for trailer) */
+    size_t available = DHCP_OPTIONS_LEN - options_out_len - 3;
+    LWIP_ASSERT("DHCP: MUD URL is too long!", mud_url_len <= available);
+    len = LWIP_MIN(mud_url_len, available);
+    LWIP_ASSERT("DHCP: MUD URL is too long!", len <= 0xFF);
+    options_out_len = dhcp_option(options_out_len, options, DHCP_OPTION_MUD_URL, (u8_t)len);
+    while (len--) {
+      options_out_len = dhcp_option_byte(options_out_len, options, *p++);
     }
   }
   return options_out_len;
 }
-#endif /* LWIP_NETIF_MUD_URL */
+#endif /* LWIP_DHCP_MUD_URL */
 
 /**
  * Extract the DHCP message and the DHCP options.
