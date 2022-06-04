@@ -446,7 +446,7 @@ dhcp_select(struct netif *netif)
 
 
 #if LWIP_DHCP_MUD_URL
-    options_out_len = dhcp_option_mud_url(options_out_len, msg_out->options, LWIP_DHCP_MUD_URL_STRING);
+    options_out_len = dhcp_option_mud_url(options_out_len, msg_out->options, LWIP_MUD_URL_STRING);
 #endif /* LWIP_DHCP_MUD_URL */
 
     LWIP_HOOK_DHCP_APPEND_OPTIONS(netif, dhcp, DHCP_STATE_REQUESTING, msg_out, DHCP_REQUEST, &options_out_len);
@@ -1489,6 +1489,8 @@ static u16_t
 dhcp_option_mud_url(u16_t options_out_len, u8_t *options, char *mud_url)
 {
   size_t mud_url_len = strlen(mud_url);
+  LWIP_ASSERT("DHCP: MUD URLs must start with https://",
+               strncmp(mud_url, "https://", 8) == 0);
   if (mud_url_len > 0) {
     size_t len;
     const char *p = mud_url;
@@ -1497,7 +1499,7 @@ dhcp_option_mud_url(u16_t options_out_len, u8_t *options, char *mud_url)
     size_t available = DHCP_OPTIONS_LEN - options_out_len - 3;
     LWIP_ASSERT("DHCP: MUD URL is too long!", mud_url_len <= available);
     len = LWIP_MIN(mud_url_len, available);
-    LWIP_ASSERT("DHCP: MUD URL is too long!", len < 253);
+    LWIP_ASSERT("DHCP: MUD URL is too long!", len < 254);
     options_out_len = dhcp_option(options_out_len, options, DHCP_OPTION_MUD_URL, (u8_t)len);
     while (len--) {
       options_out_len = dhcp_option_byte(options_out_len, options, *p++);
